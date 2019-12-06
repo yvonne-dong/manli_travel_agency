@@ -6,6 +6,17 @@
 class ofApp : public ofBaseApp{
 
 	public:
+        ofxChromaKey greenScreen;
+        ofVideoGrabber grabber;
+        bool bShowBg;
+        ofImage bgImgs[6];
+        ofImage currentBg;
+        ofImage saveImg;
+        ofTime time; // names for saved images
+        int stageNum;
+        enum Stage {BG0,BG1,BG2,BG3,BG4};
+        float bgWidth;
+    
 		void setup();
 		void update();
 		void draw();
@@ -22,9 +33,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-    ofxChromaKey bluescreen;
-    ofVideoGrabber grabber;
-    bool bShowBg;
-    ofImage replaceBg;
-    float bgWidth;
+        void stageChange(Stage _stage);
+    
+    
 };

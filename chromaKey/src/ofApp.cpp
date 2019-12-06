@@ -5,46 +5,113 @@ void ofApp::setup(){
     ofSetWindowTitle("ofxBluescreenApp");
     ofBackground(0,0,0);
     ofSetFrameRate(60);
+//    grabber.initGrabber(640, 480);
     grabber.initGrabber(640, 480);
-    bluescreen.setPixels(grabber.getPixels());
+    greenScreen.setPixels(grabber.getPixels());
     
     bShowBg = false;
-    replaceBg.load("bg.jpg");
-//    bgWidth = 640 * replaceBg.getHeight() / 480;
+    for (int i = 0; i < 6; i++){
+        bgImgs[i].load(std::to_string(i+1)+".jpg");
+    }
+    currentBg = bgImgs[0];
+    stageNum = 0; //stage for backgrounds
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
     grabber.update();
-    if(grabber.isFrameNew())
-        bluescreen.setPixels(grabber.getPixels());
+    if(grabber.isFrameNew()){
+        greenScreen.setPixels(grabber.getPixels());
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofSetColor(255);
-    if(bShowBg)
-        replaceBg.draw(0, 0);
-    bluescreen.draw(0, 0, 640, 480);
+    if(bShowBg){
+//        replaceBg.draw(0, 0);
+        float height = ofGetHeight() * currentBg.getWidth() / ofGetWidth();
+        currentBg.draw(0, 0, ofGetWidth(), height);
+    }
+    
+    greenScreen.draw(0, 0, ofGetWidth(), ofGetHeight());
     grabber.draw(0, 0, 160, 120);
-    bluescreen.drawBgColor();
+    greenScreen.drawBgColor();
+    
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::stageChange(Stage _stage){
+    switch (_stage) {
+        case Stage::BG0:
+            currentBg = bgImgs[1];
+            break;
+        case Stage::BG1:
+            currentBg = bgImgs[2];
+            break;
+        case Stage::BG2:
+            currentBg = bgImgs[3];
+            break;
+        case Stage::BG3:
+            currentBg = bgImgs[4];
+            break;
+        case Stage::BG4:
+            currentBg = bgImgs[5];
+            break;
+            
+        default:
+            break;
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    if(key == OF_KEY_UP)
-        bluescreen.setThreshold(bluescreen.getThreshold()+5);
-    if(key == OF_KEY_DOWN)
-        bluescreen.setThreshold(bluescreen.getThreshold()-5);
+//    if(key == OF_KEY_UP)
+//        greenScreen.setThreshold(greenScreen.getThreshold()+5);
+//    if(key == OF_KEY_DOWN)
+//        greenScreen.setThreshold(greenScreen.getThreshold()-5);
+    
+    if (key == OF_KEY_RIGHT){
+        if (stageNum < 5){
+            stageChange(static_cast<Stage>(stageNum));
+            stageNum ++;
+        } else {
+            //change back to 1st img
+            currentBg = bgImgs[0];
+            stageNum = 0;
+        }
+    }
+    
+//    if (key == OF_KEY_LEFT){
+//        if (stageNum > 0 && stageNum < 5){
+//            stageChange(static_cast<Stage>(stageNum));
+//            stageNum --;
+//        } else {
+//            //change back to 1st img
+//            currentBg = bgImgs[5];
+//            stageNum = 5;
+//        }
+//    }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-    if(key == ' ')
-        bluescreen.learnBgColor(grabber.getPixels());
+    if(key == ' '){
+        greenScreen.learnBgColor(grabber.getPixels());
+    }
     
-    if(key == 'b')
+    if(key == 'b'){
         bShowBg = !bShowBg;
+    }
+    
+    if(key == 's'){
+        time = ofGetCurrentTime();
+        saveImg.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
+        saveImg.save("savedImgs/"+std::to_string(time.getAsSeconds())+".png");
+    }
+    
+    
 }
 
 //--------------------------------------------------------------
